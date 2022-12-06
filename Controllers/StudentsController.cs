@@ -21,9 +21,8 @@ namespace zpnet.Controllers
         // GET: Students
         public async Task<IActionResult> Index()
         {
-              return _context.Student != null ? 
-                          View(await _context.Student.ToListAsync()) :
-                          Problem("Entity set 'zpnetContext.Student'  is null.");
+            var zpnetContext = _context.Student.Include(s => s.Field);
+            return View(await zpnetContext.ToListAsync());
         }
 
         // GET: Students/Details/5
@@ -35,6 +34,7 @@ namespace zpnet.Controllers
             }
 
             var student = await _context.Student
+                .Include(s => s.Field)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (student == null)
             {
@@ -47,6 +47,7 @@ namespace zpnet.Controllers
         // GET: Students/Create
         public IActionResult Create()
         {
+            ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa");
             return View();
         }
 
@@ -55,7 +56,7 @@ namespace zpnet.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Indeks,Imie,Nazwisko,Data_u")] Student student)
+        public async Task<IActionResult> Create([Bind("Id,Indeks,Imie,Nazwisko,Data_u,FieldId")] Student student)
         {
             if (ModelState.IsValid)
             {
@@ -63,6 +64,7 @@ namespace zpnet.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa", student.FieldId);
             return View(student);
         }
 
@@ -79,6 +81,7 @@ namespace zpnet.Controllers
             {
                 return NotFound();
             }
+            ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa", student.FieldId);
             return View(student);
         }
 
@@ -87,7 +90,7 @@ namespace zpnet.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Indeks,Imie,Nazwisko,Data_u")] Student student)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Indeks,Imie,Nazwisko,Data_u,FieldId")] Student student)
         {
             if (id != student.Id)
             {
@@ -114,6 +117,7 @@ namespace zpnet.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa", student.FieldId);
             return View(student);
         }
 
@@ -126,6 +130,7 @@ namespace zpnet.Controllers
             }
 
             var student = await _context.Student
+                .Include(s => s.Field)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (student == null)
             {
