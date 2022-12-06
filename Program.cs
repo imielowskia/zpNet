@@ -1,4 +1,9 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using zpnet.Models;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<zpnetContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("zpnetContext") ?? throw new InvalidOperationException("Connection string 'zpnetContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
