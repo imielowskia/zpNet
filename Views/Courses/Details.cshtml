@@ -37,14 +37,29 @@
                     {
                         <td>@s.Grades.First().Ocena </td>
                     }
-                </tr>    
+                    <td><td> <a asp-action="TakeGD" asp-route-id="@Model?.Id" asp-route-sid="@s.Id" class="btn btn-sm btn-secondary">Oceń</a> </td></td>
+                </tr>   
+                @if(s.GradeDetails != null) 
+                {
+                    <tr class="table-secondary">
+                    <td></td>
+                    <td>Oceny bieżące:</td>
+                    <td>
+                    @foreach(var g in s.GradeDetails)
+                    {
+                        @g.Ocena;
+                        @:&nbsp;
+                    }
+                    </td>
+                    </tr>
+                }
             }
             </tbody>
         </table>
     }    
 </div>
 <div>
-    <a asp-action="TakeGrades" asp-route-id="@Model?.Id" >Oceny końcowe</a> |
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="TakeGrades" asp-route-id="@Model?.Id" class="btn btn-sm btn-secondary" >Oceny końcowe</a> 
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-sm btn-secondary">Edit</a> 
+    <a asp-action="Index" class="btn btn-sm btn-secondary">Back to List</a>
 </div>

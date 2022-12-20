@@ -1,0 +1,35 @@
+@model zpnet.Models.Course
+
+@{
+    ViewData["Title"] = "TakeGrades";
+}
+
+<h1>Oceny z @Html.DisplayFor(model => model.Nazwa) dla @ViewBag.IN</h1>
+
+
+<form asp-action="SaveGD" method="post">
+    <input hidden name="StudentId" value="@ViewBag.StudentId" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <table class='table'>
+                <thead>
+                    <th>Ocena</th>
+                    <th>Data</th>
+                </thead>
+            @foreach(var s in ViewBag.listaOcen)
+            {
+                <tr>
+                    <td><input name="ListaOcen" class="form-control" value="@s.Ocena"/> </td>
+                    <td>@s.Data 
+                        <input hidden name="idOcen" value="@s.Id" />                        
+                    </td>
+                </tr>
+            }
+            </table>
+            <button asp-action="SaveGD" class="btn btn-primary" >Zapisz</button>
+    </div>
+</form>
+
+
+
+</table>

@@ -22,7 +22,8 @@ namespace zpnet.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Course != null ? 
-                          View(await _context.Course.Include(c=>c.Students).ThenInclude(s=>s.Grades).ToListAsync()) :
+                          View(await _context.Course.Include(c=>c.Students).ThenInclude(s=>s.Grades)
+                            .Include(c=>c.Students).ThenInclude(s=>s.GradeDetails).ToListAsync()) :
                           Problem("Entity set 'zpnetContext.Course'  is null.");
         }
 
@@ -35,6 +36,7 @@ namespace zpnet.Controllers
             }
 
             var course = await _context.Course.Include(c=>c.Students).ThenInclude(s=>s.Grades)
+                .Include(c=>c.Students).ThenInclude(s=>s.GradeDetails)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
             {
@@ -219,6 +221,82 @@ namespace zpnet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        //Metoda do formularza ocen bieżących
+        public async Task<IActionResult> TakeGD (int id, int sid)
+        {
+            var course = await _context.Course.SingleAsync(c=>c.Id==id);
+            var student = await _context.Student.Include(s=>s.GradeDetails).SingleAsync(s=>s.Id==sid);
+            var xgrades = student.GradeDetails.Where(g=>g.CourseId==id);
+            var xoceny = new List<GradeDetail>();
+            if (xgrades.Count()>0)
+            {
+                foreach(var g in xgrades)
+                {
+                    xoceny.Add( new GradeDetail
+                    {
+                        Id=g.Id,
+                        StudentId=sid,
+                        CourseId=id,
+                        Data = g.Data ,
+                        Ocena = g.Ocena
+                    }
+                    );
+                }
+            }
+            xoceny.Add( new GradeDetail
+                    {
+                        StudentId=sid,
+                        CourseId=id,
+                        Data = DateTime.Now.Date ,
+                        Ocena = 0
+                    }
+                    );
+            ViewData["listaOcen"]=xoceny;
+            ViewData["IN"]=student.IN;
+            ViewData["StudentId"]=student.Id;
+            return View(course);
+        }
+
+        //metoda zapisywania ocen bieżących
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveGD(int id)
+        {
+            var course = await _context.Course.SingleAsync(c=>c.Id==id);
+            var studentid = int.Parse(HttpContext.Request.Form["StudentId"]);
+            var xgrades = _context.GradeDetail.Where(g=>g.CourseId==id & g.StudentId==studentid);
+            var IdOcen = HttpContext.Request.Form["idOcen"];
+            var oceny = HttpContext.Request.Form["ListaOcen"];
+            var ile = oceny.Count();
+            if(xgrades.Any())
+            {
+                for(int i=0;i<ile-1;i++)
+                {
+                    var gid = int.Parse(IdOcen[i]);
+                    var xgd = _context.GradeDetail.Single(g=>g.Id==gid);
+                    xgd.Ocena = decimal.Parse(oceny[i]);
+                    if(xgd.Ocena>0)
+                    {
+                        _context.Update(xgd);
+                    }
+                    else
+                    {
+                        _context.Remove(xgd);
+                    }
+                }
+            }
+            if(decimal.Parse(oceny[ile-1])>0)
+            {
+                var ngd = new GradeDetail();
+                ngd.CourseId = id;
+                ngd.StudentId = studentid;
+                ngd.Data = DateTime.Now.Date;
+                ngd.Ocena = decimal.Parse(oceny[ile-1]);
+                _context.Add(ngd);
+            }
+            await _context.SaveChangesAsync();
+            return RedirectToAction("Details",new {id=id});
+        }
         private bool CourseExists(int id)
         {
           return (_context.Course?.Any(e => e.Id == id)).GetValueOrDefault();

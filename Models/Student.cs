@@ -26,6 +26,7 @@ namespace zpnet.Models
         public Field? Field { get; set; }
         public ICollection<Course>? Courses{get;set;}
         public ICollection<Grade>? Grades {get;set;}
+        public ICollection<GradeDetail>? GradeDetails{get;set;}
         public string IN
         {
             get
