@@ -19,5 +19,7 @@ namespace zpnet.Models
         public DbSet<zpnet.Models.Field> Field { get; set; } = default!;
 
         public DbSet<zpnet.Models.Course> Course { get; set; } = default!;
+
+        public DbSet<zpnet.Models.Grade> Grade { get; set; } = default!;
     }
 }

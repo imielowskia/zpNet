@@ -7,7 +7,7 @@
 <h1>Details</h1>
 
 <div>
-    <h4>Course</h4>
+    <h4>Przedmiot</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
@@ -19,6 +19,32 @@
     </dl>
 </div>
 <div>
+    @if(Model.Students.Any())
+    {
+        <table class="table table-sm">
+            <thead>
+            <tr>
+                <th>Student</th>
+                <th>Ocena</th>
+            </tr>    
+            </thead>
+            <tbody>
+            @foreach(var s in Model.Students)
+            {
+                <tr>
+                    <td>@s.IN</td>
+                    @if(s.Grades != null)
+                    {
+                        <td>@s.Grades.First().Ocena </td>
+                    }
+                </tr>    
+            }
+            </tbody>
+        </table>
+    }    
+</div>
+<div>
+    <a asp-action="TakeGrades" asp-route-id="@Model?.Id" >Oceny końcowe</a> |
     <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

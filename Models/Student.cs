@@ -25,6 +25,7 @@ namespace zpnet.Models
         [ForeignKey("FieldId")]
         public Field? Field { get; set; }
         public ICollection<Course>? Courses{get;set;}
+        public ICollection<Grade>? Grades {get;set;}
         public string IN
         {
             get

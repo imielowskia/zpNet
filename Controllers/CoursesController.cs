@@ -22,7 +22,7 @@ namespace zpnet.Controllers
         public async Task<IActionResult> Index()
         {
               return _context.Course != null ? 
-                          View(await _context.Course.Include(c=>c.Students).ToListAsync()) :
+                          View(await _context.Course.Include(c=>c.Students).ThenInclude(s=>s.Grades).ToListAsync()) :
                           Problem("Entity set 'zpnetContext.Course'  is null.");
         }
 
@@ -34,7 +34,7 @@ namespace zpnet.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Course
+            var course = await _context.Course.Include(c=>c.Students).ThenInclude(s=>s.Grades)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
             {
@@ -150,6 +150,71 @@ namespace zpnet.Controllers
                 _context.Course.Remove(course);
             }
             
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        //Metoda do formularza wystawiania ocen końcowych
+        public async Task<IActionResult> TakeGrades(int id)
+        {
+            var course = await _context.Course.SingleAsync(c=>c.Id==id);
+            var lista = new List<CG>();
+            var xstud = _context.Student.Include(s=>s.Courses);
+            foreach(var s in xstud)
+            {
+                if(s.Courses.Contains(course))
+                {
+                    lista.Add(new CG
+                    {
+                        StudentId = s.Id,
+                        IN  = s.IN,
+                        Grade = 0
+                    }
+                );
+                }                
+            }
+            foreach(var s in lista)
+            {
+                var xtemp = _context.Grade.Where(g=>g.CourseId==id & g.StudentId==s.StudentId);
+                if(xtemp.Count()>0 )
+                {
+                    var xg = _context.Grade.Where(g=>g.CourseId==course.Id & g.StudentId==s.StudentId).First();
+                    if(xg != null){s.Grade=xg.Ocena;}
+                }                
+            }
+            ViewData["listaOcen"]=lista;
+            return View(course);
+        }
+
+        //Metoda do zapisywania ocen końcowych
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveGrades(int id)
+        {
+            var course = await _context.Course.SingleAsync(c=>c.Id==id);
+            var xstudents = HttpContext.Request.Form["listaStudentow"];
+            var xgrades = HttpContext.Request.Form["ListaOcen"];
+            var ile = xstudents.Count();
+            for(int i=0;i<ile;i++)
+            {
+                var xsid = int.Parse(xstudents[i]);
+                var xgr = decimal.Parse(xgrades[i]);
+                var xgrade = _context.Grade.Where(g=>g.CourseId==id & g.StudentId==xsid);
+                if (xgrade.Any())
+                {
+                    var xocena = _context.Grade.Where(g=>g.CourseId==id & g.StudentId==xsid).Single();
+                    xocena.Ocena=xgr;
+                    _context.Update(xocena);
+                }
+                else
+                {
+                    var xocena = new Grade();
+                    xocena.CourseId=id;
+                    xocena.StudentId=xsid;
+                    xocena.Ocena=xgr;
+                    _context.Add(xocena);
+                }                
+            }
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
