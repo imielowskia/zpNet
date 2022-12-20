@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,5 +17,7 @@ namespace zpnet.Models
         public DbSet<zpnet.Models.Student> Student { get; set; } = default!;
 
         public DbSet<zpnet.Models.Field> Field { get; set; } = default!;
+
+        public DbSet<zpnet.Models.Course> Course { get; set; } = default!;
     }
 }

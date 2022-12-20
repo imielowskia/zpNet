@@ -24,7 +24,13 @@ namespace zpnet.Models
         public int? FieldId { get; set; }
         [ForeignKey("FieldId")]
         public Field? Field { get; set; }
-
-
+        public ICollection<Course>? Courses{get;set;}
+        public string IN
+        {
+            get
+            {
+                return Imie + " " + Nazwisko;
+            }
+        }
     }
 }

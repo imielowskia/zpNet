@@ -21,7 +21,7 @@ namespace zpnet.Controllers
         // GET: Students
         public async Task<IActionResult> Index()
         {
-            var zpnetContext = _context.Student.Include(s => s.Field);
+            var zpnetContext = _context.Student.Include(s => s.Field).Include(s=>s.Courses);
             return View(await zpnetContext.ToListAsync());
         }
 
@@ -76,12 +76,13 @@ namespace zpnet.Controllers
                 return NotFound();
             }
 
-            var student = await _context.Student.FindAsync(id);
+            var student = await _context.Student.Include(s=>s.Field).Include(s=>s.Courses).SingleAsync(s=>s.Id== id);
             if (student == null)
             {
                 return NotFound();
             }
             ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa", student.FieldId);
+            GetCourseList(id);
             return View(student);
         }
 
@@ -102,6 +103,15 @@ namespace zpnet.Controllers
                 try
                 {
                     _context.Update(student);
+                    var xcourses = HttpContext.Request.Form["selectedCourses"];                    
+                    var xsc = await _context.Student.Include(s=>s.Courses).SingleAsync(s=>s.Id==student.Id);
+                    if(xsc.Courses != null) {xsc.Courses.Clear();} else {xsc.Courses = new List<Course>();};
+                    foreach(var c in xcourses)
+                    {
+                        var xwyb = await _context.Course.SingleAsync(xc=>xc.Id==int.Parse(c));
+                        xsc.Courses.Add(xwyb);
+                    }
+                    _context.Update(xsc);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -157,6 +167,28 @@ namespace zpnet.Controllers
             
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private void GetCourseList(int? id=0)
+        {
+            var CoursesAll = _context.Course;
+            var SelectedCourses = new List<CS>();
+            var xst = _context.Student.Include(s=>s.Courses).Single(s=>s.Id == id);
+            var xch = "";
+            foreach(var c in CoursesAll)
+            {
+                
+                if(xst.Courses.Contains(c)){xch="checked";} else {xch="";};
+                SelectedCourses.Add(
+                    new CS{
+                        CourseId = c.Id,
+                        Nazwa = c.Nazwa,
+                        Checked = xch
+                    }
+                );
+            }
+            ViewData["courses"]=SelectedCourses;
+
         }
 
         private bool StudentExists(int id)
