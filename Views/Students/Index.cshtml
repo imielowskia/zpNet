@@ -6,9 +6,13 @@
 
 <h1>Lista studentów</h1>
 
+<div>
+    @await Component.InvokeAsync("StudentEdit", new {id = ViewBag.id, typ = ViewBag.typ})
+<div>
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Index" asp-route-typ="nowy">Create New</a>
 </p>
+
 <table class="table">
     <thead>
         <tr>
@@ -61,7 +65,7 @@
                 }
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Edit</a> 
+                <a asp-action="Index" asp-route-id="@item.Id" asp-route-typ="edycja" class="btn btn-sm btn-primary">Edit</a> 
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Details</a> 
                 <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Delete</a>
             </td>

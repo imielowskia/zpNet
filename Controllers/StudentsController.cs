@@ -19,9 +19,11 @@ namespace zpnet.Controllers
         }
 
         // GET: Students
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int id=0, string typ="")
         {
             var zpnetContext = _context.Student.Include(s => s.Field).Include(s=>s.Courses);
+            ViewData["typ"]=typ;
+            ViewData["id"]=id;
             return View(await zpnetContext.ToListAsync());
         }
 
@@ -66,6 +68,7 @@ namespace zpnet.Controllers
             }
             ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa", student.FieldId);
             return View(student);
+            
         }
 
         // GET: Students/Edit/5
