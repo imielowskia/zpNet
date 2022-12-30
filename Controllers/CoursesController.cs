@@ -218,7 +218,8 @@ namespace zpnet.Controllers
                 }                
             }
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            //return RedirectToAction(nameof(Index));
+            return RedirectToAction("Details",new {id=id});
         }
 
         //Metoda do formularza ocen bieżących
