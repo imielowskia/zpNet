@@ -24,7 +24,7 @@ public class StudentEditViewComponent:ViewComponent
             case "nowy":
             {
                 var xstudent = new Student{};
-                ViewData["student"]=xstudent;
+                /*ViewData["student"]=xstudent;*/
                 ViewData["FieldId"] = new SelectList(_context.Field, "Id", "Nazwa");
                 return View("Create",xstudent);
             }
